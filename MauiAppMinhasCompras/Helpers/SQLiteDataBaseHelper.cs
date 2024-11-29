@@ -8,7 +8,7 @@ using MauiAppMinhasCompras.Modells;
 
 namespace MauiAppMinhasCompras.Helpers
 {
-    internal class SQLiteDataBaseHelper
+    public class SQLiteDataBaseHelper
     {
         readonly SQLiteAsyncConnection _conn;
 
@@ -39,7 +39,7 @@ namespace MauiAppMinhasCompras.Helpers
             
             return _conn.Table<Produto>().DeleteAsync(i => i.Id == id);
         }
-        public  Task<List<Produto>> GetAll(int id) 
+        public  Task<List<Produto>> GetAll() 
         {
             return _conn.Table<Produto>().ToListAsync();
         }
