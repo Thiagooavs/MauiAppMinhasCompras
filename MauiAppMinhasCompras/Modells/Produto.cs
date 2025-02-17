@@ -4,19 +4,25 @@ namespace MauiAppMinhasCompras.Modells
 {
     public class Produto
     {
-       [PrimaryKey, AutoIncrement]
+        // Define a chave primária e a autoincrementação no banco de dados
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
 
-public int Id { get; set; }
+        // Descrição do produto (não pode ser nulo)
+        public string Descricao { get; set; }
 
-public string Descricao { get; set; }
-public double Preco { get; set; }
+        // Preço do produto
+        public double Preco { get; set; }
 
-public double Quantidade { get; set; }
-public double Total { get => Quantidade * Preco; }
+        // Quantidade do produto disponível
+        public double Quantidade { get; set; }
 
-        
-        
-           
+        // Propriedade somente leitura que calcula o total automaticamente
+        public double Total { get => Quantidade * Preco; }
+
+
+
+
 
     }
 }
