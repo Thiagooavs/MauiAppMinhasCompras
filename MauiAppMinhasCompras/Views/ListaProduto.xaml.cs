@@ -7,7 +7,9 @@ namespace MauiAppMinhasCompras.Views;
 
 public partial class ListaProduto : ContentPage
 {
-    ObservableCollection<Produto> lista = new ObservableCollection<Produto>();
+    private readonly ObservableCollection<Produto> lista = new ObservableCollection<Produto>();
+    private CancellationTokenSource _searchCancellationTokenSource;
+
     public ListaProduto()
     {
         InitializeComponent();
@@ -16,13 +18,12 @@ public partial class ListaProduto : ContentPage
 
     protected override async void OnAppearing()
     {
+        base.OnAppearing(); // 🔹 Adicionado para manter o comportamento do ciclo de vida
+
         try
         {
-            List<Produto> tmp = await App.Db.GetAll();
-            lista.Clear();
-
-
-            tmp.ForEach(i => lista.Add(i));
+            var produtos = await App.Db.GetAll();
+            AtualizarLista(produtos);
 
         }
         catch (Exception ex)
@@ -50,13 +51,26 @@ public partial class ListaProduto : ContentPage
     {
         try
         {
-            string q = e.NewTextValue;
+            _searchCancellationTokenSource?.Cancel();
+            _searchCancellationTokenSource = new CancellationTokenSource();
+            await Task.Delay(500, _searchCancellationTokenSource.Token); // 🔹 Debounce para evitar múltiplas chamadas rápidas
 
-            lista.Clear();
 
-            List<Produto> tmp = await App.Db.Search(q);
+            if (string.IsNullOrWhiteSpace(e.NewTextValue))
+            {
+                var produtos = await App.Db.GetAll();
+                AtualizarLista(produtos);
+            }
+            else
+            {
+                var produtos = await App.Db.Search(e.NewTextValue);
+                AtualizarLista(produtos);
+            }
 
-            tmp.ForEach(i => lista.Add(i));
+        }
+        catch (TaskCanceledException)
+        {
+            // 🔹 Ignorar erro se a tarefa for cancelada (evita exceções desnecessárias)
         }
         catch (Exception ex)
         {
@@ -77,26 +91,24 @@ public partial class ListaProduto : ContentPage
     {
         try
         {
-            MenuItem selecionado = sender as MenuItem;
-
-            Produto p = selecionado.BindingContext as Produto;
-
-            bool confirm = await DisplayAlert(
-                "Tem certeza?", $"Remover {p.Descricao}?", "sim", "não");
-
-            if (confirm)
+            if (sender is MenuItem menuItem && menuItem.BindingContext is Produto produtoSelecionado)
             {
-                await App.Db.Delete(p.Id);
-                lista.Remove(p);
+                bool confirm = await DisplayAlert("Tem certeza?", $"Remover {produtoSelecionado.Descricao}?", "Sim", "Não");
+
+                if (confirm)
+                {
+                    await App.Db.Delete(produtoSelecionado.Id);
+                    lista.Remove(produtoSelecionado);
+                }
             }
         }
         catch (Exception ex)
         {
-            DisplayAlert("Ops", ex.Message, "OK");
+            await DisplayAlert("Ops", ex.Message, "OK");
         }
     }
 
-    private void lst_produtos_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+    private void lst_produtos_ItemTapped(object sender, SelectedItemChangedEventArgs e)
     {
         try
         {
@@ -110,6 +122,15 @@ public partial class ListaProduto : ContentPage
         catch (Exception ex)
         {
             DisplayAlert("Ops", ex.Message, "OK");
+        }
+    }
+
+    private void AtualizarLista(IEnumerable<Produto> produtos)
+    {
+        lista.Clear(); // 🔹 Evita piscar a tela ao atualizar a lista
+        foreach (var produto in produtos)
+        {
+            lista.Add(produto);
         }
     }
 }
