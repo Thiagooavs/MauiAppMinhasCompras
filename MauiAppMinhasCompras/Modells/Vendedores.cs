@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace MauiAppMinhasCompras.Modells
 {
+    public enum Sexo
+    {
+        None = 0,
+        Masculino = 1,
+        Feminino = 2,
+    }
     public class Vendedores // Correção do nome da classe para o singular
     {
 
@@ -24,7 +30,7 @@ namespace MauiAppMinhasCompras.Modells
         public int Qtd { get; set; }
 
         // Representa o sexo do vendedor (pode ser um enum para melhor legibilidade)
-        public int sexo { get; set; }
+        public Sexo sexo { get; set; }
     }
         
 }
