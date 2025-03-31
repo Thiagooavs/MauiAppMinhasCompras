@@ -1,7 +1,6 @@
 # MauiAppMinhasCompras
 
 <div align="center">
-  <img src="/api/placeholder/200/200" alt="Logo do Aplicativo" />
   <h3>Seu Assistente de Compras Pessoal</h3>
 </div>
 
